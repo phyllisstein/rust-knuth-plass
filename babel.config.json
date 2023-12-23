@@ -1,0 +1,13 @@
+{
+    "presets": [
+        "@babel/env",
+        "@babel/typescript"
+    ],
+    "plugins": [
+        "@babel/transform-runtime",
+        ["@babel/proposal-pipeline-operator", {
+            "topicToken": "#"
+        }],
+        "@babel/proposal-do-expressions"
+    ]
+}

@@ -14,6 +14,14 @@ export default {
         path: dist,
         filename: '[name].js',
     },
+    module: {
+        rules: [
+            {
+                test: /\.(m|c|t)?js$/,
+                use: '',
+            }
+        ]
+    },
     plugins: [
         new HTMLWebpackPlugin(),
         new WasmPackPlugin({

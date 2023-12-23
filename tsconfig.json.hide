@@ -9,7 +9,15 @@
         "target": "es2020",
         "incremental": true,
         "skipLibCheck": true,
-        "moduleResolution": "NodeNext"
+        "moduleResolution": "NodeNext",
+        "lib": [
+            "ES2020",
+            "ESNext",
+            "DOM"
+        ],
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
+        "checkJs": false
     },
     "typeAcquisition": {
         "enable": true
