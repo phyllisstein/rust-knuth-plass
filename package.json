@@ -1,0 +1,25 @@
+{
+  "name": "rust-knuth-plass",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/phyllisstein/rust-knuth-plass.git",
+  "author": "Daniel P. Shannon <daniel@try.works>",
+  "license": "GPL-3.0-or-later",
+  "packageManager": "yarn@4.0.2",
+  "type": "module",
+  "scripts": {
+    "build:prod": "wasm-pack build --out-dir public/wasm --release && vite build"
+  },
+  "devDependencies": {
+    "@babel/parser": "^7.23.6",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0"
+  }
+}
