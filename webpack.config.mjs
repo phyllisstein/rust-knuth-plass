@@ -9,10 +9,19 @@ const dist = path.resolve(__dirname, 'dist')
 
 export default {
     mode: 'development',
+    devtool: 'source-map',
     entry: './js/index.ts',
     output: {
         path: dist,
         filename: '[name].js',
+    },
+    module: {
+        rules: [
+            {
+                test: /\.(m|c)?(j|t)s$/,
+                use: 'babel-loader',
+            },
+        ],
     },
     plugins: [
         new HTMLWebpackPlugin(),
