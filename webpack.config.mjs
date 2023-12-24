@@ -32,5 +32,8 @@ export default {
     ],
     experiments: {
         asyncWebAssembly: true,
-    }
+    },
+    output: {
+        clean: true,
+    },
 }
