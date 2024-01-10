@@ -1,30 +1,5 @@
+use crate::lines::constants::{Box, Glue, Node, Penalty};
 use unicode_segmentation::UnicodeSegmentation;
-
-#[derive(Debug)]
-pub struct Box {
-    pub width: u32,
-}
-
-#[derive(Debug)]
-pub struct Glue {
-    pub width: u32,
-    pub stretchability: f32,
-    pub shrinkability: f32,
-}
-
-#[derive(Debug)]
-pub struct Penalty {
-    pub width: u32,
-    pub penalty: i32,
-    pub flagged: bool,
-}
-
-#[derive(Debug)]
-pub enum Node {
-    Box(Box),
-    Glue(Glue),
-    Penalty(Penalty),
-}
 
 #[derive(Debug)]
 pub struct Graf {
