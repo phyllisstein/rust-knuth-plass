@@ -1,11 +1,4 @@
 #[derive(Debug)]
-pub enum Node {
-    Box(Box),
-    Glue(Glue),
-    Penalty(Penalty),
-}
-
-#[derive(Debug)]
 pub struct Box {
     pub width: u32,
 }

@@ -1,5 +1,13 @@
-use crate::lines::constants::{Box, Glue, Node, Penalty};
+use crate::lines::constants::{Box, Glue, Penalty};
 use unicode_segmentation::UnicodeSegmentation;
+
+#[derive(Debug)]
+pub enum Node {
+    Box(Box),
+    Glue(Glue),
+    Penalty(Penalty),
+}
+
 
 #[derive(Debug)]
 pub struct Graf {
