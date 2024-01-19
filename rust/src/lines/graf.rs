@@ -22,16 +22,20 @@ pub struct Graf {
 
 impl Graf {
     pub fn new(plain_text: String) -> Graf {
+        let nodes = Graf::parse_nodes(&plain_text);
+
         Graf {
             plain_text,
-            nodes: vec![],
+            nodes,
             feasible_breakpoints: vec![],
             active_breakpoints: vec![],
         }
     }
 
-    pub fn parse_nodes(&mut self) {
-        for (_index, grapheme) in self.plain_text.graphemes(true).enumerate() {
+    fn parse_nodes(plain_text: &str) -> Vec<Node> {
+        let mut nodes = vec![];
+
+        for grapheme in UnicodeSegmentation::graphemes(plain_text, true) {
             if !LETTER_WIDTHS.contains_key(grapheme) {
                 continue;
             }
@@ -52,7 +56,7 @@ impl Graf {
                 },
             };
 
-            self.nodes.push(node);
+            nodes.push(node);
 
             let glue = match grapheme {
                 " " => WORD_GLUE,
@@ -62,15 +66,13 @@ impl Graf {
                 _ => continue,
             };
 
-            self.nodes.push(glue);
+            nodes.push(glue);
         }
+
+        nodes
     }
 
-    pub fn get_nodes(&self) -> &Vec<Node> {
+    pub fn to_nodes(&self) -> &Vec<Node> {
         &self.nodes
-    }
-
-    pub fn to_vec(&self) -> Vec<&Node> {
-        self.nodes.iter().collect()
     }
 }

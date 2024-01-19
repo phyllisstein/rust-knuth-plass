@@ -9,10 +9,9 @@ fn main() {
 
     println!("Text: {}", text);
 
-    let mut graf = Graf::new(text.clone());
-    graf.parse_nodes();
+    let graf = Graf::new(text.to_string());
 
-    for node in graf.get_nodes() {
+    for node in graf.to_nodes() {
         let msg = match node {
             Node::Box { width } => "Box",
             Node::Glue {
