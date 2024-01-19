@@ -15,6 +15,7 @@ pub enum Node {
         penalty: i32,
         flagged: bool,
     },
+    Null {},
 }
 
 /**
@@ -27,7 +28,7 @@ pub enum Node {
  * for every line that ends with a hyphen.
  *      ---Donald E. Knuth, "Breaking Paragraphs Into Lines," in _Digital Typography_, p. 75
  */
-pub const LETTER_WIDTHS: phf::Map<&'static str, Node> = phf_map! {
+pub const LETTER_BOXES: phf::Map<&'static str, Node> = phf_map! {
     "a" => Node::Box { width: 9 },
     "A" => Node::Box { width: 9 },
     "b" => Node::Box { width: 10 },
@@ -87,38 +88,10 @@ pub const LETTER_WIDTHS: phf::Map<&'static str, Node> = phf_map! {
     "'" => Node::Box { width: 5 },
 };
 
-pub const EMPTY_GLUE: Node = Node::Glue {
-    width: 0,
-    stretchability: 0.0,
-    shrinkability: 0.0,
-};
-
-pub const WORD_GLUE: Node = Node::Glue {
-    width: 6,
-    stretchability: 3.0,
-    shrinkability: 2.0,
-};
-
-pub const COMMA_GLUE: Node = Node::Glue {
-    width: 6,
-    stretchability: 4.0,
-    shrinkability: 2.0,
-};
-
-pub const SEMICOLON_GLUE: Node = Node::Glue {
-    width: 6,
-    stretchability: 4.0,
-    shrinkability: 1.0,
-};
-
-pub const PERIOD_GLUE: Node = Node::Glue {
-    width: 8,
-    stretchability: 6.0,
-    shrinkability: 1.0,
-};
-
-pub const HYPHEN_PENALTY: Node = Node::Penalty {
-    width: 0,
-    penalty: 50,
-    flagged: false,
+pub const PUNCTUATION_GLUE: phf::Map<&'static str, Node> = phf_map! {
+    " " => Node::Glue { width: 6, stretchability: 3.0, shrinkability: 2.0 },
+    "," => Node::Glue { width: 6, stretchability: 4.0, shrinkability: 2.0 },
+    ";" => Node::Glue { width: 6, stretchability: 4.0, shrinkability: 1.0 },
+    "." => Node::Glue { width: 8, stretchability: 6.0, shrinkability: 1.0 },
+    "-" => Node::Penalty { width: 0, penalty: 50, flagged: false },
 };

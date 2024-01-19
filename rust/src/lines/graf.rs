@@ -2,7 +2,7 @@ use crate::lines::nodes::*;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug)]
-struct Breakpoint {
+pub struct Breakpoint {
     position: i16,
     line_number: i16,
     total_width: u32,
@@ -16,69 +16,57 @@ struct Breakpoint {
 pub struct Graf {
     plain_text: String,
     nodes: Vec<Node>,
-    feasible_breakpoints: Vec<i16>,
+    feasible_breakpoints: Vec<Breakpoint>,
     active_breakpoints: Vec<Breakpoint>,
 }
 
 impl Graf {
     pub fn new(plain_text: String) -> Graf {
-        let nodes = Graf::parse_nodes(&plain_text);
+        let (nodes, feasible_breakpoints) = Graf::parse_nodes(&plain_text);
 
         Graf {
             plain_text,
             nodes,
-            feasible_breakpoints: vec![],
+            feasible_breakpoints,
             active_breakpoints: vec![],
         }
     }
 
-    fn parse_nodes(plain_text: &str) -> Vec<Node> {
+    fn parse_nodes(plain_text: &str) -> (Vec<Node>, Vec<Breakpoint>) {
         let mut nodes = vec![];
+        let mut breakpoints = vec![];
 
         for grapheme in UnicodeSegmentation::graphemes(plain_text, true) {
-            if !LETTER_WIDTHS.contains_key(grapheme) {
-                continue;
+            if let Some(node) = LETTER_BOXES.get(&grapheme) {
+                nodes.push(node.clone());
+            } else if let Some(node) = PUNCTUATION_GLUE.get(&grapheme) {
+                if let Some(Node::Box { .. }) = nodes.last() {
+                    let breakpoint = Breakpoint {
+                        position: nodes.len() as i16,
+                        line_number: 0,
+                        total_width: 0,
+                        total_stretchability: 0.0,
+                        total_shrinkability: 0.0,
+                        total_demerits: 0.0,
+                        previous_breakpoint: None,
+                    };
+                    breakpoints.push(breakpoint);
+                }
+
+                nodes.push(node.clone());
+            } else {
+                nodes.push(Node::Null {});
             }
-
-            let node = match LETTER_WIDTHS[grapheme] {
-                Node::Box { width } => Node::Box { width },
-                Node::Glue {
-                    width,
-                    stretchability,
-                    shrinkability,
-                } => Node::Glue {
-                    width,
-                    stretchability,
-                    shrinkability,
-                },
-                Node::Penalty {
-                    width,
-                    penalty,
-                    flagged,
-                } => Node::Penalty {
-                    width,
-                    penalty,
-                    flagged,
-                },
-            };
-
-            nodes.push(node);
-
-            let glue = match grapheme {
-                " " => WORD_GLUE,
-                "," => COMMA_GLUE,
-                ";" => SEMICOLON_GLUE,
-                "." => PERIOD_GLUE,
-                _ => continue,
-            };
-
-            nodes.push(glue);
         }
 
-        nodes
+        (nodes, breakpoints)
     }
 
     pub fn to_nodes(&self) -> &Vec<Node> {
         &self.nodes
+    }
+
+    pub fn to_breakpoints(&self) -> &Vec<Breakpoint> {
+        &self.feasible_breakpoints
     }
 }

@@ -11,21 +11,6 @@ fn main() {
 
     let graf = Graf::new(text.to_string());
 
-    for node in graf.to_nodes() {
-        let msg = match node {
-            Node::Box { width } => "Box",
-            Node::Glue {
-                width,
-                stretchability,
-                shrinkability,
-            } => "Glue",
-            Node::Penalty {
-                penalty,
-                width,
-                flagged,
-            } => "Penalty",
-        };
-
-        println!("{:?}", msg);
-    }
+    println!("{:?}", graf.to_nodes());
+    println!("{:?}", graf.to_breakpoints());
 }
