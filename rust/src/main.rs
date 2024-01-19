@@ -13,9 +13,17 @@ fn main() {
 
     for node in graf.get_nodes() {
         let msg = match node {
-            Node::Box(_) => "Box",
-            Node::Glue(_) => "Glue",
-            Node::Penalty(_) => "Penalty",
+            Node::Box { width } => "Box",
+            Node::Glue {
+                width,
+                stretchability,
+                shrinkability,
+            } => "Glue",
+            Node::Penalty {
+                penalty,
+                width,
+                flagged,
+            } => "Penalty",
         };
 
         println!("{:?}", msg);

@@ -1,30 +1,11 @@
 use phf::phf_map;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Node {
-    Box(Box),
-    Glue(Glue),
-    Penalty(Penalty),
-}
-
-#[derive(Debug)]
-pub struct Box {
-    pub width: u32,
-}
-
-#[derive(Debug)]
-pub struct Glue {
-    pub width: u32,
-    pub stretchability: f32,
-    pub shrinkability: f32,
-}
-
-#[derive(Debug)]
-pub struct Penalty {
-    pub width: u32,
-    pub penalty: i32,
-    pub flagged: bool,
+    Box { width: u32 },
+    Glue { width: u32, stretchability: f32, shrinkability: f32 },
+    Penalty { width: u32, penalty: i32, flagged: bool },
 }
 
 #[derive(Debug)]
@@ -48,97 +29,97 @@ pub struct Breakpoint {
  * for every line that ends with a hyphen.
  *      ---Donald E. Knuth, "Breaking Paragraphs Into Lines," in _Digital Typography_, p. 75
  */
-pub const LETTER_WIDTHS: phf::Map<&'static str, Box> = phf_map! {
-    "a" => Box { width: 9 },
-    "A" => Box { width: 9 },
-    "b" => Box { width: 10 },
-    "B" => Box { width: 10 },
-    "c" => Box { width: 8 },
-    "C" => Box { width: 13 },
-    "d" => Box { width: 10 },
-    "D" => Box { width: 10 },
-    "e" => Box { width: 8 },
-    "E" => Box { width: 8 },
-    "f" => Box { width: 6 },
-    "F" => Box { width: 6 },
-    "g" => Box { width: 9 },
-    "G" => Box { width: 9 },
-    "h" => Box { width: 10 },
-    "H" => Box { width: 10 },
-    "i" => Box { width: 5 },
-    "I" => Box { width: 6 },
-    "j" => Box { width: 6 },
-    "J" => Box { width: 6 },
-    "k" => Box { width: 10 },
-    "K" => Box { width: 10 },
-    "l" => Box { width: 5 },
-    "L" => Box { width: 5 },
-    "m" => Box { width: 15 },
-    "M" => Box { width: 15 },
-    "n" => Box { width: 10 },
-    "N" => Box { width: 10 },
-    "o" => Box { width: 9 },
-    "O" => Box { width: 9 },
-    "p" => Box { width: 10 },
-    "P" => Box { width: 10 },
-    "q" => Box { width: 10 },
-    "Q" => Box { width: 10 },
-    "r" => Box { width: 7 },
-    "R" => Box { width: 7 },
-    "s" => Box { width: 7 },
-    "S" => Box { width: 7 },
-    "t" => Box { width: 7 },
-    "T" => Box { width: 7 },
-    "u" => Box { width: 10 },
-    "U" => Box { width: 10 },
-    "v" => Box { width: 9 },
-    "V" => Box { width: 9 },
-    "w" => Box { width: 13 },
-    "W" => Box { width: 13 },
-    "x" => Box { width: 10 },
-    "X" => Box { width: 10 },
-    "y" => Box { width: 10 },
-    "Y" => Box { width: 10 },
-    "z" => Box { width: 8 },
-    "Z" => Box { width: 8 },
-    "-" => Box { width: 6 },
-    "," => Box { width: 5 },
-    ";" => Box { width: 5 },
-    "." => Box { width: 5 },
-    "'" => Box { width: 5 },
+pub const LETTER_WIDTHS: phf::Map<&'static str, Node> = phf_map! {
+    "a" => Node::Box { width: 9 },
+    "A" => Node::Box { width: 9 },
+    "b" => Node::Box { width: 10 },
+    "B" => Node::Box { width: 10 },
+    "c" => Node::Box { width: 8 },
+    "C" => Node::Box { width: 13 },
+    "d" => Node::Box { width: 10 },
+    "D" => Node::Box { width: 10 },
+    "e" => Node::Box { width: 8 },
+    "E" => Node::Box { width: 8 },
+    "f" => Node::Box { width: 6 },
+    "F" => Node::Box { width: 6 },
+    "g" => Node::Box { width: 9 },
+    "G" => Node::Box { width: 9 },
+    "h" => Node::Box { width: 10 },
+    "H" => Node::Box { width: 10 },
+    "i" => Node::Box { width: 5 },
+    "I" => Node::Box { width: 6 },
+    "j" => Node::Box { width: 6 },
+    "J" => Node::Box { width: 6 },
+    "k" => Node::Box { width: 10 },
+    "K" => Node::Box { width: 10 },
+    "l" => Node::Box { width: 5 },
+    "L" => Node::Box { width: 5 },
+    "m" => Node::Box { width: 15 },
+    "M" => Node::Box { width: 15 },
+    "n" => Node::Box { width: 10 },
+    "N" => Node::Box { width: 10 },
+    "o" => Node::Box { width: 9 },
+    "O" => Node::Box { width: 9 },
+    "p" => Node::Box { width: 10 },
+    "P" => Node::Box { width: 10 },
+    "q" => Node::Box { width: 10 },
+    "Q" => Node::Box { width: 10 },
+    "r" => Node::Box { width: 7 },
+    "R" => Node::Box { width: 7 },
+    "s" => Node::Box { width: 7 },
+    "S" => Node::Box { width: 7 },
+    "t" => Node::Box { width: 7 },
+    "T" => Node::Box { width: 7 },
+    "u" => Node::Box { width: 10 },
+    "U" => Node::Box { width: 10 },
+    "v" => Node::Box { width: 9 },
+    "V" => Node::Box { width: 9 },
+    "w" => Node::Box { width: 13 },
+    "W" => Node::Box { width: 13 },
+    "x" => Node::Box { width: 10 },
+    "X" => Node::Box { width: 10 },
+    "y" => Node::Box { width: 10 },
+    "Y" => Node::Box { width: 10 },
+    "z" => Node::Box { width: 8 },
+    "Z" => Node::Box { width: 8 },
+    "-" => Node::Box { width: 6 },
+    "," => Node::Box { width: 5 },
+    ";" => Node::Box { width: 5 },
+    "." => Node::Box { width: 5 },
+    "'" => Node::Box { width: 5 },
 };
 
-pub const EMPTY_GLUE: Glue = Glue {
+pub const EMPTY_GLUE: Node = Node::Glue {
     width: 0,
     stretchability: 0.0,
     shrinkability: 0.0,
 };
 
-pub const WORD_GLUE: Glue = Glue {
+pub const WORD_GLUE: Node = Node::Glue {
     width: 6,
     stretchability: 3.0,
     shrinkability: 2.0,
 };
 
-pub const COMMA_GLUE: Glue = Glue {
+pub const COMMA_GLUE: Node = Node::Glue {
     width: 6,
     stretchability: 4.0,
     shrinkability: 2.0,
 };
 
-pub const SEMICOLON_GLUE: Glue = Glue {
+pub const SEMICOLON_GLUE: Node = Node::Glue {
     width: 6,
     stretchability: 4.0,
     shrinkability: 1.0,
 };
 
-pub const PERIOD_GLUE: Glue = Glue {
+pub const PERIOD_GLUE: Node = Node::Glue {
     width: 8,
     stretchability: 6.0,
     shrinkability: 1.0,
 };
 
-pub const HYPHEN_PENALTY: Penalty = Penalty {
+pub const HYPHEN_PENALTY: Node = Node::Penalty {
     width: 0,
     penalty: 50,
     flagged: false,
@@ -164,10 +145,20 @@ impl Graf {
 
     pub fn parse_nodes(&mut self) {
         for (_index, grapheme) in self.plain_text.graphemes(true).enumerate() {
-            let node = match LETTER_WIDTHS.get(grapheme) {
-                Some(letter) => Node::Box(Box {
-                    width: letter.width,
-                }),
+            let node = match LETTER_WIDTHS.get(grapheme).cloned() {
+                Some(Node::Box { width }) => Node::Box {
+                    width,
+                },
+                Some(Node::Glue { width, stretchability, shrinkability }) => Node::Glue {
+                    width,
+                    stretchability,
+                    shrinkability,
+                },
+                Some(Node::Penalty { width, penalty, flagged }) => Node::Penalty {
+                    width,
+                    penalty,
+                    flagged,
+                },
                 None => continue,
             };
 
@@ -181,7 +172,7 @@ impl Graf {
                 _ => continue,
             };
 
-            self.nodes.push(Node::Glue(glue));
+            self.nodes.push(glue);
         }
     }
 
