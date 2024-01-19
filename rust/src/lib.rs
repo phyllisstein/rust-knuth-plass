@@ -2,11 +2,10 @@ pub mod lines;
 
 use wasm_bindgen::prelude::*;
 use lines::graf::Graf;
-use lines::constants::KNUTH_EXAMPLE_GRAF;
 
 #[wasm_bindgen]
-pub fn break_lines() -> String {
-    let mut g = Graf::new(KNUTH_EXAMPLE_GRAF.to_string());
+pub fn break_lines(lines: &str) -> String {
+    let mut g = Graf::new(lines.to_string());
     g.parse_nodes();
     let nodes = g.get_nodes();
 
