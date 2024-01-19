@@ -1,6 +1,7 @@
 pub mod lines;
 
-use lines::graf::{Graf, Node};
+use lines::graf::Graf;
+use lines::nodes::Node;
 use std::env;
 
 fn main() {
