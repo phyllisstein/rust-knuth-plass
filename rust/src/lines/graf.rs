@@ -8,11 +8,12 @@ pub enum Node {
     Penalty(Penalty),
 }
 
-
 #[derive(Debug)]
 pub struct Graf {
     plain_text: String,
     nodes: Vec<Node>,
+    feasible_breakpoints: Vec<i16>,
+    active_nodes: Vec<i16>,
 }
 
 impl Graf {
@@ -20,6 +21,8 @@ impl Graf {
         Graf {
             plain_text,
             nodes: vec![],
+            feasible_breakpoints: vec![],
+            active_nodes: vec![],
         }
     }
 
