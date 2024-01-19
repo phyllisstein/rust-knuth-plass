@@ -1,11 +1,10 @@
 {
     "presets": [
-        "@babel/env",
+        ["@babel/env", {
+            "corejs": 3
+        }],
         ["@babel/typescript", {
             "rewriteImportExtensions": true
         }]
-    ],
-    "plugins": [
-        "@babel/transform-runtime"
     ]
 }
