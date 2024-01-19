@@ -145,21 +145,24 @@ impl Graf {
 
     pub fn parse_nodes(&mut self) {
         for (_index, grapheme) in self.plain_text.graphemes(true).enumerate() {
-            let node = match LETTER_WIDTHS.get(grapheme).cloned() {
-                Some(Node::Box { width }) => Node::Box {
+            if !LETTER_WIDTHS.contains_key(grapheme) {
+                continue;
+            }
+
+            let node = match LETTER_WIDTHS[grapheme] {
+                Node::Box { width } => Node::Box {
                     width,
                 },
-                Some(Node::Glue { width, stretchability, shrinkability }) => Node::Glue {
+                Node::Glue { width, stretchability, shrinkability } => Node::Glue {
                     width,
                     stretchability,
                     shrinkability,
                 },
-                Some(Node::Penalty { width, penalty, flagged }) => Node::Penalty {
+                Node::Penalty { width, penalty, flagged } => Node::Penalty {
                     width,
                     penalty,
                     flagged,
                 },
-                None => continue,
             };
 
             self.nodes.push(node);
