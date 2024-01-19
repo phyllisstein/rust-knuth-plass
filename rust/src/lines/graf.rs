@@ -41,15 +41,21 @@ impl Graf {
             }
 
             let node = match LETTER_WIDTHS[grapheme] {
-                Node::Box { width } => Node::Box {
+                Node::Box { width } => Node::Box { width },
+                Node::Glue {
                     width,
-                },
-                Node::Glue { width, stretchability, shrinkability } => Node::Glue {
+                    stretchability,
+                    shrinkability,
+                } => Node::Glue {
                     width,
                     stretchability,
                     shrinkability,
                 },
-                Node::Penalty { width, penalty, flagged } => Node::Penalty {
+                Node::Penalty {
+                    width,
+                    penalty,
+                    flagged,
+                } => Node::Penalty {
                     width,
                     penalty,
                     flagged,
