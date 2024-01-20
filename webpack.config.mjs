@@ -14,17 +14,28 @@ export default {
     output: {
         path: dist,
         filename: '[name].js',
+        clean: true,
     },
     module: {
         rules: [
             {
-                test: /\.(m|c)?(j|t)s$/,
+                test: /\.([mc])?([jt])s$/,
                 use: 'babel-loader',
             },
+            {
+                test: /\.pug$/,
+                use: 'pug-loader',
+            },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader'],
+            }
         ],
     },
     plugins: [
-        new HTMLWebpackPlugin(),
+        new HTMLWebpackPlugin({
+            template: '!!pug-loader!./js/index.pug',
+        }),
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, 'rust'),
             outDir: path.resolve(__dirname, 'rust/pkg'),
@@ -32,8 +43,5 @@ export default {
     ],
     experiments: {
         asyncWebAssembly: true,
-    },
-    output: {
-        clean: true,
     },
 }

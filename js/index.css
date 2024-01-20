@@ -1,0 +1,10 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    hyphens: manual;
+    font-size: 32px;
+}
