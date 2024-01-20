@@ -5,10 +5,11 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn break_lines(lines: &str) -> String {
-    let mut g = Graf::new(lines.to_string());
-    let result = format!("{:?}", g.parse());
+    let g = Graf::new(lines.to_string());
 
-    println!("{}", result);
+    println!("Nodes: {:?}", g.get_nodes());
+    println!("Feasible breakpoints: {:?}", g.get_feasible_breakpoints());
+    println!("Active breakpoints: {:?}", g.get_active_breakpoints());
 
-    result
+    g.parse().get_hyphens()
 }

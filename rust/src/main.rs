@@ -10,7 +10,7 @@ fn main() {
 
     println!("Text: {}", text);
 
-    let mut graf = Graf::new(text);
+    let graf = Graf::new(text);
 
-    println!("{:?}", graf.parse());
+    println!("{:?}", graf.parse().get_hyphens());
 }
