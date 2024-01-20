@@ -1,16 +1,16 @@
 pub mod lines;
 
 use lines::graf::Graf;
-use lines::nodes::Node;
 use std::env;
 
 fn main() {
-    let text = env::args().nth(1).expect("Please provide a string");
+    let text = env::args().nth(1).unwrap_or(
+        "Five Reasons Drinking Milk On the Toilet Is Kind Of a Game Changer".to_string(),
+    );
 
     println!("Text: {}", text);
 
-    let graf = Graf::new(text.to_string());
+    let mut graf = Graf::new(text);
 
-    println!("{:?}", graf.to_nodes());
-    println!("{:?}", graf.to_breakpoints());
+    println!("{:?}", graf.parse());
 }
