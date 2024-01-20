@@ -1,4 +1,5 @@
 use crate::lines::nodes::*;
+use std::cell::RefCell;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Clone)]
@@ -9,32 +10,31 @@ pub struct Breakpoint {
     total_stretchability: f32,
     total_shrinkability: f32,
     total_demerits: f32,
-    previous_breakpoint: Option<Box<Breakpoint>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Graf {
     plain_text: String,
-    nodes: Vec<Node>,
-    feasible_breakpoints: Vec<Breakpoint>,
-    active_breakpoints: Vec<Breakpoint>,
+    nodes: RefCell<Vec<Node>>,
+    feasible_breakpoints: RefCell<Vec<Breakpoint>>,
+    active_breakpoints: RefCell<Vec<Breakpoint>>,
 }
 
 impl Graf {
     pub fn new(plain_text: String) -> Graf {
         Graf {
             plain_text,
-            nodes: vec![],
-            feasible_breakpoints: vec![],
-            active_breakpoints: vec![],
+            nodes: RefCell::new(vec![]),
+            feasible_breakpoints: RefCell::new(vec![]),
+            active_breakpoints: RefCell::new(vec![]),
         }
     }
 
-    pub fn parse_nodes(&self, text: &String) -> (Vec<Node>, Vec<Breakpoint>) {
+    fn parse_nodes(&self) {
         let mut nodes = vec![];
         let mut breakpoints = vec![];
 
-        for (position, grapheme) in text.graphemes(true).enumerate() {
+        for (position, grapheme) in self.plain_text.graphemes(true).enumerate() {
             if let Some(node) = LETTER_BOXES.get(grapheme) {
                 nodes.push(node.clone());
             } else if let Some(node) = PUNCTUATION_GLUE.get(grapheme) {
@@ -51,31 +51,30 @@ impl Graf {
             }
         }
 
-        (nodes, breakpoints)
+        self.nodes.replace(nodes);
+        self.feasible_breakpoints.replace(breakpoints);
     }
 
-    fn calculate_breakpoint(&self, nodes: &[Node], position: usize) -> Breakpoint {
-        // FIXME: This should be `active_breakpoints` instead of `feasible_breakpoints`.
-        let previous_breakpoint = self.feasible_breakpoints.last().unwrap_or(&Breakpoint {
+    fn calculate_breakpoint(&self, nodes: &Vec<Node>, position: usize) -> Breakpoint {
+        let feasible_breakpoints = self.feasible_breakpoints.borrow();
+        let previous_breakpoint = feasible_breakpoints.last().unwrap_or(&Breakpoint {
             position: 0,
             line_number: 0,
             total_width: 0,
             total_stretchability: 0.0,
             total_shrinkability: 0.0,
             total_demerits: 0.0,
-            previous_breakpoint: None,
         });
 
         let mut next_breakpoint = Breakpoint {
             position,
-            // previous_breakpoint: Some(Box::new(previous_breakpoint.clone())),
             ..previous_breakpoint.clone()
         };
 
         let new_nodes = &nodes[previous_breakpoint.position..position];
 
         for node in new_nodes.iter() {
-            let &width = match node {
+            let width = match node {
                 Node::Box { width } => width,
                 Node::Glue { width, .. } => width,
                 Node::Penalty { width, .. } => width,
@@ -104,6 +103,8 @@ impl Graf {
         self.nodes = nodes;
         self.feasible_breakpoints = breakpoints;
 
+    pub fn parse(&self) -> &Graf {
+        self.parse_nodes();
         self
     }
 
