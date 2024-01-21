@@ -2,7 +2,7 @@ use crate::lines::nodes::*;
 use std::cell::RefCell;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Breakpoint {
     position: usize,
     line_number: i16,
@@ -31,23 +31,19 @@ impl Graf {
     }
 
     fn parse_nodes(&self) {
-        let mut nodes = vec![];
+        let mut nodes: Vec<Node> = vec![];
         let mut breakpoints = vec![];
 
         for (position, grapheme) in self.plain_text.graphemes(true).enumerate() {
-            if let Some(node) = LETTER_BOXES.get(grapheme) {
-                nodes.push(node.clone());
-            } else if let Some(node) = PUNCTUATION_GLUE.get(grapheme) {
+            if let Some(&node) = LETTER_BOXES.get(grapheme) {
+                nodes.push(node);
+            } else if let Some(&node) = PUNCTUATION_GLUE.get(grapheme) {
                 if let Some(Node::Box { .. }) = nodes.last() {
                     let breakpoint = self.calculate_breakpoint(&nodes, position);
                     breakpoints.push(breakpoint);
                 }
 
-                nodes.push(node.clone());
-            } else {
-                nodes.push(Node::Null {
-                    grapheme: grapheme.to_string(),
-                });
+                nodes.push(node);
             }
         }
 
@@ -55,9 +51,9 @@ impl Graf {
         self.feasible_breakpoints.replace(breakpoints);
     }
 
-    fn calculate_breakpoint(&self, nodes: &Vec<Node>, position: usize) -> Breakpoint {
+    fn calculate_breakpoint(&self, nodes: &[Node], position: usize) -> Breakpoint {
         let feasible_breakpoints = self.feasible_breakpoints.borrow();
-        let previous_breakpoint = feasible_breakpoints.last().unwrap_or(&Breakpoint {
+        let &previous_breakpoint = feasible_breakpoints.last().unwrap_or(&Breakpoint {
             position: 0,
             line_number: 0,
             total_width: 0,
@@ -68,7 +64,7 @@ impl Graf {
 
         let mut next_breakpoint = Breakpoint {
             position,
-            ..previous_breakpoint.clone()
+            ..previous_breakpoint
         };
 
         let new_nodes = &nodes[previous_breakpoint.position..position];
@@ -78,7 +74,6 @@ impl Graf {
                 Node::Box { width } => width,
                 Node::Glue { width, .. } => width,
                 Node::Penalty { width, .. } => width,
-                _ => &0,
             };
 
             next_breakpoint.total_width += width;

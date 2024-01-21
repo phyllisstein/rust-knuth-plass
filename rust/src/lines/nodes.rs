@@ -1,6 +1,6 @@
 use phf::phf_map;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Node {
     Box {
         width: u32,
@@ -14,9 +14,6 @@ pub enum Node {
         width: u32,
         penalty: i32,
         flagged: bool,
-    },
-    Null {
-        grapheme: String,
     },
 }
 
