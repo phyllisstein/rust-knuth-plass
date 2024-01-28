@@ -15,18 +15,18 @@ pub struct Breakpoint {
 #[derive(Debug, Clone)]
 pub struct Graf {
     plain_text: String,
-    nodes: RefCell<Vec<Node>>,
-    feasible_breakpoints: RefCell<Vec<Breakpoint>>,
-    active_breakpoints: RefCell<Vec<Breakpoint>>,
+    nodes: Vec<Node>,
+    feasible_breakpoints: Vec<Breakpoint>,
+    active_breakpoints: Vec<Breakpoint>,
 }
 
 impl Graf {
     pub fn new(plain_text: String) -> Graf {
         Graf {
             plain_text,
-            nodes: RefCell::new(vec![]),
-            feasible_breakpoints: RefCell::new(vec![]),
-            active_breakpoints: RefCell::new(vec![]),
+            nodes: vec![],
+            feasible_breakpoints: vec![],
+            active_breakpoints: vec![],
         }
     }
 
@@ -47,8 +47,8 @@ impl Graf {
             }
         }
 
-        self.nodes.replace(nodes);
-        self.feasible_breakpoints.replace(breakpoints);
+        self.nodes.append(&mut nodes);
+        self.feasible_breakpoints.append(&mut breakpoints);
     }
 
     fn calculate_breakpoint(&self, nodes: &[Node], position: usize) -> Breakpoint {
