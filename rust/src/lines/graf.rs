@@ -92,10 +92,12 @@ impl Graf {
         next_breakpoint
     }
 
-    pub fn get_hyphens(&self) -> String {
+    pub fn get_hyphens(&mut self) -> String {
         let mut hyphens = String::from(&self.plain_text);
 
-        for (position, breakpoint) in self.feasible_breakpoints.borrow().iter().enumerate() {
+        self.parse_nodes();
+
+        for (position, breakpoint) in self.feasible_breakpoints.iter().enumerate() {
             let new_position = breakpoint.position + (position * 5);
             hyphens.insert_str(new_position, "&shy;");
         }
