@@ -103,24 +103,17 @@ impl Graf {
         hyphens
     }
 
-    pub fn parse(&self) -> &Graf {
+    pub fn get_feasible_breakpoints(&mut self) -> &Vec<Breakpoint> {
         self.parse_nodes();
-        self
+        &self.feasible_breakpoints
     }
 
-    pub fn get_nodes(&self) -> Vec<Node> {
-        self.nodes.borrow().clone()
+    pub fn get_active_breakpoints(&mut self) -> &Vec<Breakpoint> {
+        self.parse_nodes();
+        &self.active_breakpoints
     }
 
-    pub fn get_feasible_breakpoints(&self) -> Vec<Breakpoint> {
-        self.feasible_breakpoints.borrow().clone()
-    }
-
-    pub fn get_active_breakpoints(&self) -> Vec<Breakpoint> {
-        self.active_breakpoints.borrow().clone()
-    }
-
-    pub fn get_plain_text(&self) -> String {
-        self.plain_text.clone()
+    pub fn get_plain_text(&mut self) -> &String {
+        &self.plain_text
     }
 }
