@@ -1,8 +1,7 @@
 use crate::lines::nodes::*;
-use std::cell::RefCell;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Breakpoint {
     position: usize,
     line_number: i16,
@@ -30,9 +29,9 @@ impl Graf {
         }
     }
 
-    fn parse_nodes(&self) {
+    fn parse_nodes(&mut self) {
         let mut nodes: Vec<Node> = vec![];
-        let mut breakpoints = vec![];
+        let mut breakpoints: Vec<Breakpoint> = vec![];
 
         for (position, grapheme) in self.plain_text.graphemes(true).enumerate() {
             if let Some(&node) = LETTER_BOXES.get(grapheme) {
@@ -52,15 +51,33 @@ impl Graf {
     }
 
     fn calculate_breakpoint(&self, nodes: &[Node], position: usize) -> Breakpoint {
-        let feasible_breakpoints = self.feasible_breakpoints.borrow();
-        let &previous_breakpoint = feasible_breakpoints.last().unwrap_or(&Breakpoint {
-            position: 0,
-            line_number: 0,
-            total_width: 0,
-            total_stretchability: 0.0,
-            total_shrinkability: 0.0,
-            total_demerits: 0.0,
-        });
+        let feasible_breakpoints = &self.feasible_breakpoints;
+
+        let previous_breakpoint = match feasible_breakpoints.last() {
+            Some(&Breakpoint {
+                position,
+                line_number,
+                total_width,
+                total_stretchability,
+                total_shrinkability,
+                total_demerits,
+            }) => Breakpoint {
+                position,
+                line_number,
+                total_width,
+                total_stretchability,
+                total_shrinkability,
+                total_demerits,
+            },
+            _ => Breakpoint {
+                position: 0,
+                line_number: 0,
+                total_width: 0,
+                total_stretchability: 0.0,
+                total_shrinkability: 0.0,
+                total_demerits: 0.0,
+            },
+        };
 
         let mut next_breakpoint = Breakpoint {
             position,
