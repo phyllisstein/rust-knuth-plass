@@ -88,9 +88,9 @@ pub const LETTER_BOXES: phf::Map<&'static str, Node> = phf_map! {
 };
 
 pub const PUNCTUATION_GLUE: phf::Map<&'static str, Node> = phf_map! {
-    " " => Node::Glue { width: 6, stretchability: 3.0, shrinkability: 2.0 },
-    "," => Node::Glue { width: 6, stretchability: 4.0, shrinkability: 2.0 },
-    ";" => Node::Glue { width: 6, stretchability: 4.0, shrinkability: 1.0 },
-    "." => Node::Glue { width: 8, stretchability: 6.0, shrinkability: 1.0 },
+    " " => Node::Glue { width: 6, stretchability: 3, shrinkability: 2 },
+    "," => Node::Glue { width: 6, stretchability: 4, shrinkability: 2 },
+    ";" => Node::Glue { width: 6, stretchability: 4, shrinkability: 1 },
+    "." => Node::Glue { width: 8, stretchability: 6, shrinkability: 1 },
     "-" => Node::Penalty { width: 0, penalty: 50, flagged: false },
 };
