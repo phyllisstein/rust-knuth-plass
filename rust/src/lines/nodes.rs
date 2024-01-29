@@ -7,8 +7,8 @@ pub enum Node {
     },
     Glue {
         width: u32,
-        stretchability: f32,
-        shrinkability: f32,
+        stretchability: u32,
+        shrinkability: u32,
     },
     Penalty {
         width: u32,
