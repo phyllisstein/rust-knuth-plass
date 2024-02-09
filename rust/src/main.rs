@@ -1,5 +1,6 @@
 pub mod lines;
 
+use crate::lines::constants::KNUTH_EXAMPLE_GRAF;
 use lines::graf::Graf;
 use std::env;
 
@@ -8,9 +9,9 @@ fn main() {
         "Five Reasons Drinking Milk On the Toilet Is Kind Of a Game Changer".to_string(),
     );
 
-    println!("Text: {}", text);
+    println!("Text: {}", String::from(KNUTH_EXAMPLE_GRAF));
 
-    let mut graf = Graf::new(text);
+    let mut graf = Graf::new(String::from(KNUTH_EXAMPLE_GRAF));
 
     println!("{:?}", &graf.get_hyphens());
 }

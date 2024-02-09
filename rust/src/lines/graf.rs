@@ -48,8 +48,12 @@ impl Graf {
             }
         }
 
-        self.nodes.append(&mut nodes);
-        self.all_breakpoints.append(&mut breakpoints);
+        self.nodes = nodes;
+        self.all_breakpoints = breakpoints;
+    }
+
+    pub fn find_active_breakpoint(&mut self) {
+        let mut active_breakpoints: Vec<Breakpoint> = vec![];
     }
 
     fn calculate_breakpoint(&self, nodes: &[Node], position: usize) -> Breakpoint {
@@ -84,7 +88,7 @@ impl Graf {
             ..previous_breakpoint
         };
 
-        let new_nodes = &nodes[previous_breakpoint.position..position];
+        let new_nodes = &nodes[previous_breakpoint.position..(position - 1)];
 
         for node in new_nodes.iter() {
             let width = match node {
@@ -110,16 +114,8 @@ impl Graf {
         next_breakpoint
     }
 
+    // Last active breakpoint to current breakpoint.
     fn calculate_adjustment_ratio(&self) {}
-
-    fn find_active_breakpoints(&mut self) {}
-
-    fn compute_adjustment_ratio(&mut self, lhs: Breakpoint, rhs: Breakpoint) {
-        let mut adjustment_ratio = 0;
-        let intervening_nodes = self.nodes.iter().take_while(|node| {
-            node.position >= lhs.position && node.position <= rhs.position;
-        });
-    }
 
     pub fn get_hyphens(&mut self) -> String {
         let mut hyphens = String::from(&self.plain_text);
