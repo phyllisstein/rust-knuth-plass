@@ -3,83 +3,75 @@ use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Clone)]
 pub struct Breakpoint {
+    active: bool,
     position: usize,
-    line_number: i16,
-    total_width: u32,
-    total_stretchability: u32,
-    total_shrinkability: u32,
     total_demerits: u32,
+    total_shrinkability: u32,
+    total_stretchability: u32,
+    total_width: u32,
 }
 
 #[derive(Debug, Clone)]
 pub struct Graf {
     plain_text: String,
     nodes: Vec<Node>,
-    all_breakpoints: Vec<Breakpoint>,
-    active_breakpoints: Vec<Breakpoint>,
+    breakpoints: Vec<Breakpoint>,
 }
 
 impl Graf {
-    const TARGET_LINE_LENGTH: i32 = 60;
+    const TARGET_LINE_LENGTH: usize = 60;
 
     pub fn new(plain_text: String) -> Graf {
         Graf {
             plain_text,
             nodes: vec![],
-            all_breakpoints: vec![],
-            active_breakpoints: vec![],
+            breakpoints: vec![],
         }
     }
 
     fn parse_nodes(&mut self) {
-        let mut nodes: Vec<Node> = vec![];
-        let mut breakpoints: Vec<Breakpoint> = vec![];
-
         for (position, grapheme) in self.plain_text.graphemes(true).enumerate() {
             if let Some(&node) = LETTER_BOXES.get(grapheme) {
-                nodes.push(node);
+                self.nodes.push(node);
             } else if let Some(&node) = PUNCTUATION_GLUE.get(grapheme) {
-                if let Some(Node::Box { .. }) = nodes.last() {
-                    let breakpoint = self.calculate_breakpoint(&nodes, position);
-                    breakpoints.push(breakpoint);
-                }
+                self.nodes.push(node);
 
-                nodes.push(node);
+                if let Node::Box { .. } = self.nodes[position - 1] {
+                    let breakpoint = self.calculate_breakpoint(position);
+                    self.breakpoints.push(breakpoint);
+                }
             }
         }
-
-        self.nodes = nodes;
-        self.all_breakpoints = breakpoints;
     }
 
     pub fn find_active_breakpoint(&mut self) {
         let mut active_breakpoints: Vec<Breakpoint> = vec![];
     }
 
-    fn calculate_breakpoint(&self, nodes: &[Node], position: usize) -> Breakpoint {
-        let previous_breakpoint = match self.all_breakpoints.last() {
+    fn calculate_breakpoint(&self, position: usize) -> Breakpoint {
+        let previous_breakpoint = match self.breakpoints.last() {
             Some(&Breakpoint {
+                active,
                 position,
-                line_number,
                 total_width,
                 total_stretchability,
                 total_shrinkability,
                 total_demerits,
             }) => Breakpoint {
+                active,
                 position,
-                line_number,
-                total_width,
-                total_stretchability,
-                total_shrinkability,
                 total_demerits,
+                total_shrinkability,
+                total_stretchability,
+                total_width,
             },
             _ => Breakpoint {
+                active: false,
                 position: 0,
-                line_number: 0,
-                total_width: 0,
-                total_stretchability: 0,
-                total_shrinkability: 0,
                 total_demerits: 0,
+                total_shrinkability: 0,
+                total_stretchability: 0,
+                total_width: 0,
             },
         };
 
@@ -88,7 +80,7 @@ impl Graf {
             ..previous_breakpoint
         };
 
-        let new_nodes = &nodes[previous_breakpoint.position..(position - 1)];
+        let new_nodes = &self.nodes[previous_breakpoint.position..(position - 1)];
 
         for node in new_nodes.iter() {
             let width = match node {
@@ -122,7 +114,7 @@ impl Graf {
 
         self.parse_nodes();
 
-        for (position, breakpoint) in self.all_breakpoints.iter().enumerate() {
+        for (position, breakpoint) in self.breakpoints.iter().enumerate() {
             let new_position = breakpoint.position + (position * 5);
             hyphens.insert_str(new_position, "&shy;");
         }
@@ -132,12 +124,7 @@ impl Graf {
 
     pub fn get_feasible_breakpoints(&mut self) -> &Vec<Breakpoint> {
         self.parse_nodes();
-        &self.all_breakpoints
-    }
-
-    pub fn get_active_breakpoints(&mut self) -> &Vec<Breakpoint> {
-        self.parse_nodes();
-        &self.active_breakpoints
+        &self.breakpoints
     }
 
     pub fn get_plain_text(&mut self) -> &String {
