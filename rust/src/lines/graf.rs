@@ -44,10 +44,6 @@ impl Graf {
         }
     }
 
-    pub fn find_active_breakpoint(&mut self) {
-        let mut active_breakpoints: Vec<Breakpoint> = vec![];
-    }
-
     fn calculate_breakpoint(&self, position: usize) -> Breakpoint {
         let previous_breakpoint = match self.breakpoints.last() {
             Some(&Breakpoint {
@@ -100,8 +96,8 @@ impl Graf {
                 next_breakpoint.total_stretchability += stretchability;
                 next_breakpoint.total_shrinkability += shrinkability;
             }
-        }
-        println!("{:?}", next_breakpoint);
+        };
+        println!("{:?}", &next_breakpoint);
 
         next_breakpoint
     }
