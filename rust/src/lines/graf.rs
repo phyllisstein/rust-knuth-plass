@@ -30,6 +30,19 @@ impl Graf {
     }
 
     fn parse_nodes(&mut self) {
+        self.nodes.clear();
+
+        self.breakpoints.clear();
+        self.breakpoints.push(Breakpoint {
+                active: true,
+                position: 0,
+                total_demerits: 0,
+                total_shrinkability: 0,
+                total_stretchability: 0,
+                total_width: 0,
+            }
+        );
+
         for (position, grapheme) in self.plain_text.graphemes(true).enumerate() {
             if let Some(&node) = LETTER_BOXES.get(grapheme) {
                 self.nodes.push(node);
@@ -45,35 +58,12 @@ impl Graf {
     }
 
     fn calculate_breakpoint(&self, position: usize) -> Breakpoint {
-        let previous_breakpoint = match self.breakpoints.last() {
-            Some(&Breakpoint {
-                active,
-                position,
-                total_width,
-                total_stretchability,
-                total_shrinkability,
-                total_demerits,
-            }) => Breakpoint {
-                active,
-                position,
-                total_demerits,
-                total_shrinkability,
-                total_stretchability,
-                total_width,
-            },
-            _ => Breakpoint {
-                active: false,
-                position: 0,
-                total_demerits: 0,
-                total_shrinkability: 0,
-                total_stretchability: 0,
-                total_width: 0,
-            },
-        };
+        let previous_breakpoint = self.breakpoints.last().unwrap();
 
         let mut next_breakpoint = Breakpoint {
             position,
-            ..previous_breakpoint
+            active: false,
+            ..previous_breakpoint.clone()
         };
 
         let new_nodes = &self.nodes[previous_breakpoint.position..(position - 1)];
@@ -111,16 +101,16 @@ impl Graf {
         self.parse_nodes();
 
         for (position, breakpoint) in self.breakpoints.iter().enumerate() {
-            let new_position = breakpoint.position + (position * 5);
+            let new_position = breakpoint.position + (position * 5); // 5 is the length of `&shy;`
             hyphens.insert_str(new_position, "&shy;");
         }
 
         hyphens
     }
 
-    pub fn get_feasible_breakpoints(&mut self) -> &Vec<Breakpoint> {
+    pub fn get_feasible_breakpoints(&mut self) -> Vec<Breakpoint> {
         self.parse_nodes();
-        &self.breakpoints
+        self.breakpoints.clone()
     }
 
     pub fn get_plain_text(&mut self) -> &String {
