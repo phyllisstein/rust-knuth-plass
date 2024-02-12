@@ -1,7 +1,7 @@
 use crate::lines::nodes::*;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Breakpoint {
     active: bool,
     position: usize,
@@ -30,6 +30,18 @@ impl Graf {
     }
 
     fn parse_nodes(&mut self) {
+        self.nodes.clear();
+
+        self.breakpoints.clear();
+        self.breakpoints.push(Breakpoint {
+            active: true,
+            position: 0,
+            total_demerits: 0,
+            total_shrinkability: 0,
+            total_stretchability: 0,
+            total_width: 0,
+        });
+
         for (position, grapheme) in self.plain_text.graphemes(true).enumerate() {
             if let Some(&node) = LETTER_BOXES.get(grapheme) {
                 self.nodes.push(node);
@@ -45,40 +57,17 @@ impl Graf {
     }
 
     fn calculate_breakpoint(&self, position: usize) -> Breakpoint {
-        let previous_breakpoint = match self.breakpoints.last() {
-            Some(&Breakpoint {
-                active,
-                position,
-                total_width,
-                total_stretchability,
-                total_shrinkability,
-                total_demerits,
-            }) => Breakpoint {
-                active,
-                position,
-                total_demerits,
-                total_shrinkability,
-                total_stretchability,
-                total_width,
-            },
-            _ => Breakpoint {
-                active: false,
-                position: 0,
-                total_demerits: 0,
-                total_shrinkability: 0,
-                total_stretchability: 0,
-                total_width: 0,
-            },
-        };
+        let previous_breakpoint = self.breakpoints.last().unwrap();
 
         let mut next_breakpoint = Breakpoint {
             position,
-            ..previous_breakpoint
+            active: false,
+            ..*previous_breakpoint
         };
 
         let new_nodes = &self.nodes[previous_breakpoint.position..(position - 1)];
 
-        for node in new_nodes.iter() {
+        for node in new_nodes {
             let width = match node {
                 Node::Box { width } => width,
                 Node::Glue { width, .. } => width,
@@ -97,13 +86,32 @@ impl Graf {
                 next_breakpoint.total_shrinkability += shrinkability;
             }
         };
-        println!("{:?}", &next_breakpoint);
 
         next_breakpoint
     }
 
+    fn last_active_breakpoint(&self) -> &Breakpoint {
+        self.breakpoints
+            .iter()
+            .filter(|breakpoint| breakpoint.active)
+            .last()
+            .unwrap()
+    }
+
     // Last active breakpoint to current breakpoint.
-    fn calculate_adjustment_ratio(&self) {}
+    fn calculate_adjustment_ratio(&self, start: &Breakpoint, end: &Breakpoint) {
+        let total_width = end.total_width - start.total_width;
+        let total_stretchability = end.total_stretchability - start.total_stretchability;
+        let total_shrinkability = end.total_shrinkability - start.total_shrinkability;
+
+        let adjustment_ratio = if total_width > Self::TARGET_LINE_LENGTH as u32 {
+            (total_width - Self::TARGET_LINE_LENGTH as u32) as f32 / total_stretchability as f32
+        } else {
+            (Self::TARGET_LINE_LENGTH as u32 - total_width) as f32 / total_shrinkability as f32
+        };
+
+        println!("Adjustment ratio: {}", adjustment_ratio);
+    }
 
     pub fn get_hyphens(&mut self) -> String {
         let mut hyphens = String::from(&self.plain_text);
@@ -111,7 +119,7 @@ impl Graf {
         self.parse_nodes();
 
         for (position, breakpoint) in self.breakpoints.iter().enumerate() {
-            let new_position = breakpoint.position + (position * 5);
+            let new_position = breakpoint.position + (position * 5); // 5 is the length of `&shy;`
             hyphens.insert_str(new_position, "&shy;");
         }
 
