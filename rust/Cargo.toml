@@ -11,6 +11,8 @@ crate-type = ["cdylib", "rlib"]
 wasm-bindgen = "0.2"
 unicode-segmentation = "1"
 phf = { version = "0.11.2", features = ["macros"] }
+reqwest = { version = "0.11.24", features = ["blocking"] }
+error-chain = "0.12.4"
 
 [dependencies.web-sys]
 version = "0.3"
