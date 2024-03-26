@@ -10,7 +10,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 wasm-bindgen = "0.2"
 unicode-segmentation = "1"
-phf = { version = "0.11.2", features = ["macros"] }
+lazy_static = "1.4.0"
 
 [dependencies.web-sys]
 version = "0.3"

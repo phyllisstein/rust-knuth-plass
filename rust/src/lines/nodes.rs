@@ -1,96 +1,147 @@
-use phf::phf_map;
+use std::collections::HashMap;
 
-#[derive(Debug, Copy, Clone)]
-pub enum Node {
-    Box {
-        width: u32,
-    },
-    Glue {
-        width: u32,
-        stretchability: u32,
-        shrinkability: u32,
-    },
-    Penalty {
-        width: u32,
-        penalty: i32,
-        flagged: bool,
-    },
+// 'a' through 'z' are respectively (9, 10, 8, 10, 8, 6, 9, 10, 5, 6, 10, 5,
+// 15,10, 9, 10, 10, 7, 7, 7, 10, 9, 13, 10, 10, 8) units wide and the
+// characters 'C', 'I', and '-' have respective widths of 13, 6, and 6 units.
+// Commas, semicolons, periods, and apostrophes occupy 5 units each. Glue has
+// specifications (w, y, z) = (6, 3, 2) between words, except that it is (6, 4,
+// 2) after a comma, (6, 4, 1) after a semicolon, and (8, 6, 1) after a period.
+// A penalty of 50 has been assessed for every line that ends with a hyphen.
+//      ---Donald E. Knuth, "Breaking Paragraphs Into Lines"
+lazy_static! {
+    static ref CHARACTER_BOX_WIDTHS: HashMap<char, u32> = HashMap::from([
+        ('a', 9),
+        ('A', 9),
+        ('b', 10),
+        ('B', 10),
+        ('c', 8),
+        ('C', 13),
+        ('d', 10),
+        ('D', 10),
+        ('e', 8),
+        ('E', 8),
+        ('f', 6),
+        ('F', 6),
+        ('g', 9),
+        ('G', 9),
+        ('h', 10),
+        ('H', 10),
+        ('i', 5),
+        ('I', 6),
+        ('j', 6),
+        ('J', 6),
+        ('k', 10),
+        ('K', 10),
+        ('l', 5),
+        ('L', 5),
+        ('m', 15),
+        ('M', 15),
+        ('n', 10),
+        ('N', 10),
+        ('o', 9),
+        ('O', 9),
+        ('p', 10),
+        ('P', 10),
+        ('q', 10),
+        ('Q', 10),
+        ('r', 7),
+        ('R', 7),
+        ('s', 7),
+        ('S', 7),
+        ('t', 7),
+        ('T', 7),
+        ('u', 10),
+        ('U', 10),
+        ('v', 9),
+        ('V', 9),
+        ('w', 13),
+        ('W', 13),
+        ('x', 10),
+        ('X', 10),
+        ('y', 10),
+        ('Y', 10),
+        ('z', 8),
+        ('Z', 8),
+        ('-', 6),
+        (',', 5),
+        (';', 5),
+        ('.', 5),
+        (' ', 5),
+    ]);
+
+    // Tuple: (width, stretchability, shrinkability)
+    static ref CHARACTER_GLUE_WIDTHS: HashMap<char, (u32, u32, u32)> = HashMap::from([
+        (' ', (6, 3, 2)),
+        (',', (6, 4, 2)),
+        (';', (6, 4, 1)),
+        ('.', (8, 6, 1)),
+    ]);
+
+
 }
 
-/**
- * 'a' through 'z' are respectively (9, 10, 8, 10, 8, 6, 9, 10, 5, 6, 10, 5, 15,10,
- * 9, 10, 10, 7, 7, 7, 10, 9, 13, 10, 10, 8) units wide and the characters 'C', 'I',
- * and '-' have respective widths of 13, 6, and 6 units. Commas, semicolons, periods,
- * and apostrophes occupy 5 units each. Glue has specifications (w, y, z) = (6, 3, 2)
- * between words, except that it is (6, 4, 2) after a comma, (6, 4, 1) after a
- * semicolon, and (8, 6, 1) after a period. A penalty of 50 has been assessed
- * for every line that ends with a hyphen.
- *      ---Donald E. Knuth, "Breaking Paragraphs Into Lines," in _Digital Typography_, p. 75
- */
-pub const LETTER_BOXES: phf::Map<&'static str, Node> = phf_map! {
-    "a" => Node::Box { width: 9 },
-    "A" => Node::Box { width: 9 },
-    "b" => Node::Box { width: 10 },
-    "B" => Node::Box { width: 10 },
-    "c" => Node::Box { width: 8 },
-    "C" => Node::Box { width: 13 },
-    "d" => Node::Box { width: 10 },
-    "D" => Node::Box { width: 10 },
-    "e" => Node::Box { width: 8 },
-    "E" => Node::Box { width: 8 },
-    "f" => Node::Box { width: 6 },
-    "F" => Node::Box { width: 6 },
-    "g" => Node::Box { width: 9 },
-    "G" => Node::Box { width: 9 },
-    "h" => Node::Box { width: 10 },
-    "H" => Node::Box { width: 10 },
-    "i" => Node::Box { width: 5 },
-    "I" => Node::Box { width: 6 },
-    "j" => Node::Box { width: 6 },
-    "J" => Node::Box { width: 6 },
-    "k" => Node::Box { width: 10 },
-    "K" => Node::Box { width: 10 },
-    "l" => Node::Box { width: 5 },
-    "L" => Node::Box { width: 5 },
-    "m" => Node::Box { width: 15 },
-    "M" => Node::Box { width: 15 },
-    "n" => Node::Box { width: 10 },
-    "N" => Node::Box { width: 10 },
-    "o" => Node::Box { width: 9 },
-    "O" => Node::Box { width: 9 },
-    "p" => Node::Box { width: 10 },
-    "P" => Node::Box { width: 10 },
-    "q" => Node::Box { width: 10 },
-    "Q" => Node::Box { width: 10 },
-    "r" => Node::Box { width: 7 },
-    "R" => Node::Box { width: 7 },
-    "s" => Node::Box { width: 7 },
-    "S" => Node::Box { width: 7 },
-    "t" => Node::Box { width: 7 },
-    "T" => Node::Box { width: 7 },
-    "u" => Node::Box { width: 10 },
-    "U" => Node::Box { width: 10 },
-    "v" => Node::Box { width: 9 },
-    "V" => Node::Box { width: 9 },
-    "w" => Node::Box { width: 13 },
-    "W" => Node::Box { width: 13 },
-    "x" => Node::Box { width: 10 },
-    "X" => Node::Box { width: 10 },
-    "y" => Node::Box { width: 10 },
-    "Y" => Node::Box { width: 10 },
-    "z" => Node::Box { width: 8 },
-    "Z" => Node::Box { width: 8 },
-    "-" => Node::Box { width: 6 },
-    "," => Node::Box { width: 5 },
-    ";" => Node::Box { width: 5 },
-    "." => Node::Box { width: 5 },
-    "'" => Node::Box { width: 5 },
-};
 
-pub const PUNCTUATION_GLUE: phf::Map<&'static str, Node> = phf_map! {
-    " " => Node::Glue { width: 6, stretchability: 3, shrinkability: 2 },
-    "," => Node::Glue { width: 6, stretchability: 4, shrinkability: 2 },
-    ";" => Node::Glue { width: 6, stretchability: 4, shrinkability: 1 },
-    "." => Node::Glue { width: 8, stretchability: 6, shrinkability: 1 },
-    "-" => Node::Penalty { width: 0, penalty: 50, flagged: false },
-};
+pub trait Node {
+    fn width(&self) -> u32;
+}
+
+#[derive(Debug)]
+pub struct BoxNode {
+    pub width: u32,
+    pub grapheme: char,
+}
+
+impl Node for BoxNode {
+    fn width(&self) -> u32 {
+        self.width
+    }
+}
+
+impl BoxNode {
+    pub fn from_char(grapheme: char) -> BoxNode {
+        match CHARACTER_BOX_WIDTHS.get(&grapheme) {
+            Some(&width) => BoxNode { grapheme, width },
+            _ => BoxNode { grapheme, width: 0 },
+        }
+    }
+
+    pub fn from_values(width: u32, grapheme: char) -> BoxNode {
+        BoxNode {
+            width,
+            grapheme,
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct GlueNode {
+    pub width: u32,
+    pub stretchability: u32,
+    pub shrinkability: u32,
+    pub grapheme: char,
+}
+
+impl Node for GlueNode {
+    fn width(&self) -> u32 {
+        self.width
+    }
+}
+
+impl GlueNode {
+    pub fn from_char(grapheme: char) -> GlueNode {
+        match CHARACTER_GLUE_WIDTHS.get(&grapheme) {
+            Some(&(width, stretchability, shrinkability)) => GlueNode { width, stretchability, shrinkability, grapheme },
+            _ => GlueNode { width: 0, stretchability: 0, shrinkability: 0, grapheme },
+        }
+    }
+
+    pub fn from_values(width: u32, stretchability: u32, shrinkability: u32, grapheme: char) -> GlueNode {
+        GlueNode {
+            width,
+            stretchability,
+            shrinkability,
+            grapheme,
+        }
+    }
+}

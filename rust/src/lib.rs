@@ -1,5 +1,8 @@
 pub mod lines;
 
+#[macro_use]
+extern crate lazy_static;
+
 use lines::graf::Graf;
 use wasm_bindgen::prelude::*;
 
