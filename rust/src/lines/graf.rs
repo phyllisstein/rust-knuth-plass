@@ -1,6 +1,6 @@
 use crate::lines::nodes::*;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Breakpoint {
     active: bool,
     position: usize,

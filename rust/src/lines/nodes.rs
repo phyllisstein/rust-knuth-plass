@@ -80,7 +80,7 @@ lazy_static! {
 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct BoxNode {
     pub width: u32,
     pub grapheme: char,
@@ -100,7 +100,7 @@ impl BoxNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct GlueNode {
     pub width: u32,
     pub stretchability: u32,
