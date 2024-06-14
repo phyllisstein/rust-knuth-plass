@@ -80,39 +80,25 @@ lazy_static! {
 
 }
 
-
-pub trait Node {
-    fn width(&self) -> u32;
-}
-
 #[derive(Debug)]
 pub struct BoxNode {
     pub width: u32,
     pub grapheme: char,
-}
-
-impl Node for BoxNode {
-    fn width(&self) -> u32 {
-        self.width
-    }
+    pub position: usize,
 }
 
 impl BoxNode {
-    pub fn from_char(grapheme: char) -> BoxNode {
+    pub fn from_char(grapheme: char, position: usize) -> Option<BoxNode> {
         match CHARACTER_BOX_WIDTHS.get(&grapheme) {
-            Some(&width) => BoxNode { grapheme, width },
-            _ => BoxNode { grapheme, width: 0 },
-        }
-    }
-
-    pub fn from_values(width: u32, grapheme: char) -> BoxNode {
-        BoxNode {
-            width,
-            grapheme,
+            Some(&width) => Some(BoxNode {
+                grapheme,
+                width,
+                position,
+            }),
+            _ => None,
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct GlueNode {
@@ -120,28 +106,20 @@ pub struct GlueNode {
     pub stretchability: u32,
     pub shrinkability: u32,
     pub grapheme: char,
-}
-
-impl Node for GlueNode {
-    fn width(&self) -> u32 {
-        self.width
-    }
+    pub position: usize,
 }
 
 impl GlueNode {
-    pub fn from_char(grapheme: char) -> GlueNode {
+    pub fn from_char(grapheme: char, position: usize) -> Option<GlueNode> {
         match CHARACTER_GLUE_WIDTHS.get(&grapheme) {
-            Some(&(width, stretchability, shrinkability)) => GlueNode { width, stretchability, shrinkability, grapheme },
-            _ => GlueNode { width: 0, stretchability: 0, shrinkability: 0, grapheme },
-        }
-    }
-
-    pub fn from_values(width: u32, stretchability: u32, shrinkability: u32, grapheme: char) -> GlueNode {
-        GlueNode {
-            width,
-            stretchability,
-            shrinkability,
-            grapheme,
+            Some(&(width, stretchability, shrinkability)) => Some(GlueNode {
+                width,
+                stretchability,
+                shrinkability,
+                grapheme,
+                position,
+            }),
+            _ => None,
         }
     }
 }

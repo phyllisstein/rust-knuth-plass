@@ -1,7 +1,6 @@
 use crate::lines::nodes::*;
-use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 pub struct Breakpoint {
     active: bool,
     position: usize,
@@ -13,9 +12,10 @@ pub struct Breakpoint {
 
 #[derive(Debug, Clone)]
 pub struct Graf {
-    plain_text: String,
-    nodes: Vec<Node>,
+    boxes: Vec<BoxNode>,
     breakpoints: Vec<Breakpoint>,
+    glue: Vec<GlueNode>,
+    plain_text: String,
 }
 
 impl Graf {
@@ -24,14 +24,13 @@ impl Graf {
     pub fn new(plain_text: String) -> Graf {
         Graf {
             plain_text,
-            nodes: vec![],
+            boxes: vec![],
+            glue: vec![],
             breakpoints: vec![],
         }
     }
 
     fn parse_nodes(&mut self) {
-        self.nodes.clear();
-
         self.breakpoints.clear();
         self.breakpoints.push(Breakpoint {
             active: true,
@@ -42,75 +41,18 @@ impl Graf {
             total_width: 0,
         });
 
-        for (position, grapheme) in self.plain_text.graphemes(true).enumerate() {
-            if let Some(&node) = LETTER_BOXES.get(grapheme) {
-                self.nodes.push(node);
-            } else if let Some(&node) = PUNCTUATION_GLUE.get(grapheme) {
-                self.nodes.push(node);
+        for (position, grapheme) in self.plain_text.chars().into_iter().enumerate() {
+            if let Some(node) = BoxNode::from_char(grapheme, position) {
+                self.boxes.push(node);
+            }
 
-                if let Node::Box { .. } = self.nodes[position - 1] {
-                    let breakpoint = self.calculate_breakpoint(position);
-                    self.breakpoints.push(breakpoint);
-                }
+            if let Some(node) = GlueNode::from_char(grapheme, position) {
+                self.glue.push(node);
             }
         }
-    }
 
-    fn calculate_breakpoint(&self, position: usize) -> Breakpoint {
-        let previous_breakpoint = self.breakpoints.last().unwrap();
-
-        let mut next_breakpoint = Breakpoint {
-            position,
-            active: false,
-            ..*previous_breakpoint
-        };
-
-        let new_nodes = &self.nodes[previous_breakpoint.position..(position - 1)];
-
-        for node in new_nodes {
-            let width = match node {
-                Node::Box { width } => width,
-                Node::Glue { width, .. } => width,
-                Node::Penalty { width, .. } => width,
-            };
-
-            next_breakpoint.total_width += width;
-
-            if let Node::Glue {
-                stretchability,
-                shrinkability,
-                ..
-            } = node
-            {
-                next_breakpoint.total_stretchability += stretchability;
-                next_breakpoint.total_shrinkability += shrinkability;
-            }
-        };
-
-        next_breakpoint
-    }
-
-    fn last_active_breakpoint(&self) -> &Breakpoint {
-        self.breakpoints
-            .iter()
-            .filter(|breakpoint| breakpoint.active)
-            .last()
-            .unwrap()
-    }
-
-    // Last active breakpoint to current breakpoint.
-    fn calculate_adjustment_ratio(&self, start: &Breakpoint, end: &Breakpoint) {
-        let total_width = end.total_width - start.total_width;
-        let total_stretchability = end.total_stretchability - start.total_stretchability;
-        let total_shrinkability = end.total_shrinkability - start.total_shrinkability;
-
-        let adjustment_ratio = if total_width > Self::TARGET_LINE_LENGTH as u32 {
-            (total_width - Self::TARGET_LINE_LENGTH as u32) as f32 / total_stretchability as f32
-        } else {
-            (Self::TARGET_LINE_LENGTH as u32 - total_width) as f32 / total_shrinkability as f32
-        };
-
-        println!("Adjustment ratio: {}", adjustment_ratio);
+        println!("{:?}", self.boxes);
+        println!("{:?}", self.glue);
     }
 
     pub fn get_hyphens(&mut self) -> String {
@@ -124,14 +66,5 @@ impl Graf {
         }
 
         hyphens
-    }
-
-    pub fn get_feasible_breakpoints(&mut self) -> &Vec<Breakpoint> {
-        self.parse_nodes();
-        &self.breakpoints
-    }
-
-    pub fn get_plain_text(&mut self) -> &String {
-        &self.plain_text
     }
 }
